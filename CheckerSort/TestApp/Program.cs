@@ -13,7 +13,7 @@ namespace TestApp
         static void Main(string[] args)
         {
 
-            int valueMin = Int32.MinValue/2;//要素の最小値
+            int valueMin = int.MinValue/2;//要素の最小値
             int valueMax = int.MaxValue/2;//要素の最大値
             int itemNum = 100000000;//要素数
 
@@ -36,7 +36,7 @@ namespace TestApp
 
             //チェッカーソート
             Console.WriteLine();
-            Console.Write("チェッカーソート :");
+            Console.Write("チェッカーソートv2...");
 
 
             sw.Start();
@@ -50,7 +50,7 @@ namespace TestApp
             sw.Reset();
 
             //デフォルトのソート
-            Console.Write("デフォルトのソート :");
+            Console.Write("デフォルトのソート...");
 
             sw.Start();
 
