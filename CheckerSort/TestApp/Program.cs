@@ -13,36 +13,60 @@ namespace TestApp
         static void Main(string[] args)
         {
 
-            int valueMin = int.MinValue/2;//要素の最小値
-            int valueMax = int.MaxValue/2;//要素の最大値
-            int itemNum = 100000000;//要素数
+            SortTimer(int.MinValue/2,int.MaxValue/2,100000000);
+            SortTimer(int.MinValue, int.MaxValue, 100000000);
+
+            //測定終了
+            Console.Write("PressKey...");
+            Console.ReadKey();
+            Console.WriteLine();
+        }
+
+        static void SortTimer(int valueMin,int valueMax,int itemNum)
+        {
 
             System.Diagnostics.Stopwatch sw = new Stopwatch();//ストップウォッチ
             Random rand = new Random();//乱数
 
             int[] a = new int[itemNum];//作成用の要素
             int[] b = new int[itemNum];//aのコピー
+            int[] c = new int[itemNum];//aのコピー
 
             //要素の作成
             for (int i = 0; i < itemNum; i++)
             {
-                a[i] = rand.Next(valueMin, valueMax);
-                b[i] = a[i];
+                a[i] = b[i] = c[i] = rand.Next(valueMin, valueMax);
             }
 
             Console.WriteLine("要素数 :" + itemNum);
             Console.WriteLine("範囲 :int型" + valueMin + "～" + valueMax);
-
-
-            //チェッカーソート
             Console.WriteLine();
-            Console.Write("チェッカーソートv2...");
+
+            #region チェッカーソート（固定）
+            /*
+            Console.WriteLine();
+            Console.Write("チェッカーソートv3(固定)...");
 
 
             sw.Start();
-            CSort sort = new CSort(valueMin, valueMax);
-            sort.StartSort(a);
+            //CSort sort = new CSort(valueMin, valueMax);
+            //sort.StartSort(a);
+            CSort.UnsafeSort(a);
+            sw.Stop();
 
+            Console.WriteLine(sw.Elapsed);
+
+            sw.Reset();
+            */
+            #endregion
+
+
+            //チェッカーソート
+            Console.Write("チェッカーソートv3...");
+
+
+            sw.Start();
+            CSort.Sort(b);
             sw.Stop();
 
             Console.WriteLine(sw.Elapsed);
@@ -54,14 +78,11 @@ namespace TestApp
 
             sw.Start();
 
-            Array.Sort(b);//デフォルトのソート
+            Array.Sort(c);//デフォルトのソート
 
             sw.Stop();
             Console.WriteLine(sw.Elapsed);
 
-            //測定終了
-            Console.Write("PressKey...");
-            Console.ReadKey();
             Console.WriteLine();
         }
     }

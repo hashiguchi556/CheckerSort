@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace CheckerSort
 {
@@ -20,7 +16,7 @@ namespace CheckerSort
         public T this[int index]
         {
             get => _items[index];
-        
+
             set => _items[index] = value;
         } //インデクサー
 
@@ -125,12 +121,14 @@ namespace CheckerSort
     //チェッカーソート
     public class CSort
     {
+        //過去物
+        /*
         private int[] _checker; //チェック用の配列
-        private SortArray<Suffer>[] _sufA;//被り情報
-        private int _sufAnum;//被り情報の配列数
-        private int _sufAcontainNum;//sufAのコンストラクタの値
-        private int _min;//使用する値の最大値
-        private int _max;//使用する値の最小値
+        private SortArray<Suffer>[] _sufA; //被り情報
+        private int _sufAnum; //被り情報の配列数
+        private int _sufAcontainNum; //sufAのコンストラクタの値
+        private int _min; //使用する値の最大値
+        private int _max; //使用する値の最小値
 
 
         //コンストラクタ　要素の最小値と最大値　
@@ -141,13 +139,13 @@ namespace CheckerSort
             _max = max;
 
             //チェッカーの初期化
-            int checkerNum= checked (_max - _min)/32+1;//値の範囲が合計でint.MaxValueを越えると例外がでる
-            _checker = new int[checkerNum];
+            int checkerNum = checked(_max - _min) / 32 + 1; //値の範囲が合計でint.MaxValueを越えると例外がでる
+            //_checker = new int[checkerNum];
 
             //被り情報の初期化
             _sufAnum = paramA;
             _sufAcontainNum = paramB;
-            _sufA = new SortArray<Suffer>[_sufAnum+1];
+            _sufA = new SortArray<Suffer>[_sufAnum + 1];
 
         }
 
@@ -155,66 +153,68 @@ namespace CheckerSort
         public int StartSort(int[] box)
         {
             //初期化
-            int boxNum = box.Length;//要素数の数
-            _checker = new int[(_max - _min) / 32 + 1];//チェッカー
-            _sufA = new SortArray<Suffer>[_sufAnum];//被り情報
+            int boxNum = box.Length; //要素数の数
+            int[] _checker = new int[(_max - _min) / 32 + 1]; //チェッカー
+            _sufA = new SortArray<Suffer>[_sufAnum]; //被り情報
             int sufU = (int)((long)_checker.Length * 32 / _sufAnum) + 1; //被りの配列の単位
+
+
 
             //没
             //_BcheckDiv = (_max - _min) / 3 < boxNum ? 0 : (_max - _min) / boxNum;
             //_Bchecker =new int[(_max - _min)/32/_BcheckDiv+1];
 
-            int maxSufAI = 0;//SufAの使用している最大インデックス
+            int maxSufAI = 0; //SufAの使用している最大インデックス
 
 
             //初期化と同時に最初の要素を調べる
-            int pos= box[0] - _min;//チェックポイントの場所
+            int pos = box[0] - _min; //チェックポイントの場所
 
-            int maxPos = pos;//最大値のチェックポイント
-            int minPos = pos;//最小値のチェックポイント
+            int maxPos = pos; //最大値のチェックポイント
+            int minPos = pos; //最小値のチェックポイント
 
             _checker[pos / 32] += 1 << (pos % 32);
 
 
             for (int i = 1; i < boxNum; i++)
             {
-                pos = box[i]-_min;//チェックの付ける場所を指定
+                pos = box[i] - _min; //チェックの付ける場所を指定
 
                 int a = pos / 32; //チェッカーのインデックス
                 int b = 1 << (pos % 32); //チェッカーの場所
-                if ((_checker[a] & b) == 0)//まだチェックをつけていなければ
+                if ((_checker[a] & b) == 0) //まだチェックをつけていなければ
                 {
                     if (maxPos < pos)
                         maxPos = pos;
                     if (minPos > pos)
                         minPos = pos;
-                        
+
                     //_Bchecker[a / _BcheckDiv] = _Bchecker[a / _BcheckDiv] | (1 << (pos / _BcheckDiv % 32));没
 
-                    _checker[a] += b;//チェックをつける
+                    _checker[a] += b; //チェックをつける
                 }
-                else//すでにチェックがついていたら（被ったら）
+                else //すでにチェックがついていたら（被ったら）
                 {
-                    int sg = pos / sufU;//被り配列のグループ番号
-                    if (_sufA[sg] != null)//すでに被り配列が作られていたら
+                    int sg = pos / sufU; //被り配列のグループ番号
+                    if (_sufA[sg] != null) //すでに被り配列が作られていたら
                     {
-                        int sufIn = _sufA[sg].Find(pos);//すでに被っているか検索
-                        if (sufIn == -1)//初めて被ったら
+                        int sufIn = _sufA[sg].Find(pos); //すでに被っているか検索
+                        if (sufIn == -1) //初めて被ったら
                         {
                             //新しいかぶりを作成
                             _sufA[sg].Add(new Suffer(pos, 2));
                         }
-                        else//すでに被っていたら
+                        else //すでに被っていたら
                         {
                             //かぶりを追加
                             Suffer suf = new Suffer(pos, _sufA[sg][sufIn].Suffers + 1);
                             _sufA[sg][sufIn] = suf;
                         }
                     }
-                    else//まだ作られていなければ
+                    else //まだ作られていなければ
                     {
                         if (maxSufAI < sg)
-                            maxSufAI=sg;
+                            maxSufAI = sg;
                         //新しい被り配列を作成
                         _sufA[sg] = new SortArray<Suffer>(_sufAcontainNum);
 
@@ -234,7 +234,7 @@ namespace CheckerSort
             //Suffer[] sufA = SortArray<Suffer>.MergeToArray(_sufSA);
 
             //仕上げ
-            int checkerNum = maxPos/32+1;//使用するチェッカーの数
+            int checkerNum = maxPos / 32 + 1; //使用するチェッカーの数
             int I = 0;
 
             //pos = minPos / 32 * 32;　加算処理の削減
@@ -243,31 +243,31 @@ namespace CheckerSort
             int sufAI = 0;
 
             //OutOfIndexExceptionの対策
-            _sufA[maxSufAI + 1]=new SortArray<Suffer>(3);
+            _sufA[maxSufAI + 1] = new SortArray<Suffer>(3);
             _sufA[maxSufAI + 1].Add(new Suffer(0, 0));
             _sufA[maxSufAI + 1].Add(new Suffer(0, 0));
 
-            SortArray<Suffer> nextSufArray;//SufAの要素のバッファ
-            while ((nextSufArray = _sufA[sufAI++])==null) ;//null以外の
-            Suffer nextSuf = nextSufArray[sufI++];//
-             
+            SortArray<Suffer> nextSufArray; //SufAの要素のバッファ
+            while ((nextSufArray = _sufA[sufAI++]) == null) ; //null以外の
+            Suffer nextSuf = nextSufArray[sufI++]; //
 
-            int check = 0;//チェッカーのバッファ
-            for (int i = minPos/32; i < checkerNum; i++)//初期値を最小値に合わせる
+
+            int check = 0; //チェッカーのバッファ
+            for (int i = minPos / 32; i < checkerNum; i++) //初期値を最小値に合わせる
             {
                 check = _checker[i];
-                if (check != 0)//必要のない箇所は飛ばす
+                if (check != 0) //必要のない箇所は飛ばす
                 {
                     for (int j = 0; j < 32; j++)
                     {
                         if ((check & (1 << j)) != 0)
                         {
-                            pos  = i * 32 + j;//posの位置
+                            pos = i * 32 + j; //posの位置
 
-                            if (nextSuf.Position == pos)//被っている場合
+                            if (nextSuf.Position == pos) //被っている場合
                             {
-                                pos += _min;//実際の値だが使いまわす
-                                for (int k = 0; k < nextSuf.Suffers; k++)//被った回数だけboxに入れる
+                                pos += _min; //実際の値だが使いまわす
+                                for (int k = 0; k < nextSuf.Suffers; k++) //被った回数だけboxに入れる
                                 {
                                     box[I++] = pos;
                                 }
@@ -276,11 +276,11 @@ namespace CheckerSort
                                 nextSuf = nextSufArray[sufI++];
                                 if (nextSufArray.Count == sufI)
                                 {
-                                    while((nextSufArray = _sufA[sufAI++])==null);
+                                    while ((nextSufArray = _sufA[sufAI++]) == null) ;
                                     sufI = 0;
                                 }
                             }
-                            else//被ってなければ
+                            else //被ってなければ
                             {
                                 box[I++] = pos + _min;
                             }
@@ -288,7 +288,7 @@ namespace CheckerSort
                     }
                 }
             }
-            
+
             /*没
             pos = minPos / _BcheckDiv*_BcheckDiv;
             int BcheckNum = maxPos / _BcheckDiv;
@@ -337,9 +337,565 @@ namespace CheckerSort
                 }
                 pos++;
             }
-            */
+            //
 
             return I;
         }
+        */
+
+
+        //ソート（ソート中にboxを固定しない）
+        public static int[] Sort(int[] box)
+        {
+            //初期化
+
+            int boxNum = box.Length; //要素数の数
+            if (boxNum == 0)
+                return box;
+            unsafe
+            {
+                //メモリ確保
+                int* pluschecker = (int*)Marshal.AllocHGlobal(67108865 * 4); //正の数チェッカー
+                int* minuschecker = (int*)Marshal.AllocHGlobal(67108865 * 4); //負の数チェッカー
+                for (int j = 0; j < 67108865; j++)
+                {
+                    pluschecker[j] = 0;
+                    minuschecker[j] = 0;
+                }
+
+                int plusMaxPos = 0; //正の最大値のチェックポイント
+                int plusMinPos = int.MaxValue; //正の最小値のチェックポイント
+                int minusMaxPos = 0; //負の最大値のチェックポイント
+                int minusMinPos = plusMinPos; //負の最小値のチェックポイント
+                int intMin = int.MinValue; //int型最小値
+                int sufAnum = 2147483647 / 65536 + 2; //被りの配列の数
+                int sufU = 65536; //被りの配列の単位
+
+                SortArray<Suffer>[] plussufA = new SortArray<Suffer>[sufAnum]; //被り情報
+                SortArray<Suffer>[] minussufA = new SortArray<Suffer>[sufAnum]; //被り情報
+
+                int plusMaxsufAI = 0; //plussufAの使用している最大インデックス
+                int minusMaxsufAI = 0; //minussufAの使用している最大インデックス
+
+                int pos; //チェックの位置
+                int a; //チェッカーのインデックス
+                int b; //チェッカーの場所
+
+
+                //int num = box[0]; //値を格納する場所 //格納しないほうが速い
+
+
+                int i;//for文用変数
+
+                //チェックする
+                for (i = 0; i < boxNum; i++)
+                {
+                    //num = box[i];
+                    pos = box[i];
+                    if (pos < 0) //値が負の数なら
+                    {
+                        #region minusCheck
+
+                        pos-= intMin; //チェックの位置
+                        a = pos / 32; //チェッカーのインデックス
+                        b = 1 << (pos % 32); //チェッカーの場所
+                        if ((minuschecker[a] & b) == 0) //まだチェックをつけていなければ
+                        {
+                            if (pos < minusMinPos)
+                                minusMinPos = pos;
+                            if (pos > minusMaxPos)
+                                minusMaxPos = pos;
+
+                            minuschecker[a] += b; //チェックをつける
+                        }
+                        else //すでにチェックがついていたら（被ったら）
+                        {
+                            //int sg = pos / sufU; //被り配列のグループ番号
+                            SortArray<Suffer> sas = minussufA[pos / sufU];
+                            if (sas != null) //すでに被り配列が作られていたら
+                            {
+                                int sufIn = sas.Find(pos); //すでに被っているか検索
+                                if (sufIn == -1) //初めて被ったら
+                                {
+                                    //新しいかぶりを作成
+                                    sas.Add(new Suffer(pos, 2));
+                                }
+                                else //すでに被っていたら
+                                {
+                                    //かぶりを追加
+                                    Suffer suf = new Suffer(pos, sas[sufIn].Suffers + 1);
+                                    sas[sufIn] = suf;
+                                }
+                            }
+                            else //まだ作られていなければ
+                            {
+                                if (minusMaxsufAI < pos / sufU)
+                                    minusMaxsufAI = pos / sufU;
+                                //新しい被り配列を作成
+                                sas = minussufA[pos / sufU] = new SortArray<Suffer>(400);
+                                sas.Add(new Suffer(pos, 2));
+                            }
+                        }
+
+                        #endregion
+                    }
+                    else //値が正の数なら
+                    {
+                        #region plusCheck
+
+                        //pos = box[i]; //チェックの位置
+                        a = pos / 32; //チェッカーのインデックス
+                        b = 1 << (pos % 32); //チェッカーの場所
+                        if ((pluschecker[a] & b) == 0) //まだチェックをつけていなければ
+                        {
+                            if (pos < plusMinPos)
+                                plusMinPos = pos;
+                            if (pos > plusMaxPos)
+                                plusMaxPos = pos;
+
+                            pluschecker[a] += b; //チェックをつける
+                        }
+                        else //すでにチェックがついていたら（被ったら）
+                        {
+                            //int sg = pos / sufU; //被り配列のグループ番号
+                            SortArray<Suffer> sas = plussufA[pos / sufU];
+                            if (sas != null) //すでに被り配列が作られていたら
+                            {
+                                int sufIn = sas.Find(pos); //すでに被っているか検索
+                                if (sufIn == -1) //初めて被ったら
+                                {
+                                    //新しいかぶりを作成
+                                    sas.Add(new Suffer(pos, 2));
+                                }
+                                else //すでに被っていたら
+                                {
+                                    //かぶりを追加
+                                    Suffer suf = new Suffer(pos, sas[sufIn].Suffers + 1);
+                                    sas[sufIn] = suf;
+                                }
+                            }
+                            else //まだ作られていなければ
+                            {
+                                if (plusMaxsufAI < pos / sufU)
+                                    plusMaxsufAI = pos / sufU;
+                                //新しい被り配列を作成
+                                sas = plussufA[pos / sufU] = new SortArray<Suffer>(400);
+                                sas.Add(new Suffer(pos, 2));
+                            }
+
+
+
+                        }
+
+                        #endregion
+                    }
+                }
+
+                //被り配列の並び替え
+                for (i = 0; i < sufAnum; i++)
+                {
+                    if (plussufA[i] != null)
+                        plussufA[i].Sort();
+                    if (minussufA[i] != null)
+                        minussufA[i].Sort();
+                }
+
+                //仕上げ
+                int I = 0;//boxのインデックス
+                int sufI = 0;//nextsufArrayのインデックス
+                int sufAI = 0;//sufArrayのインデックス
+                SortArray<Suffer> nextSufArray; //nextSufの配列
+                Suffer nextSuf;//次の被り情報
+                int checkNum;//チェックを確認するべき場所
+
+                #region minusPutting
+
+                //OutOfIndexExceptionの対策
+                minussufA[minusMaxsufAI + 1] = new SortArray<Suffer>(3);
+                minussufA[minusMaxsufAI + 1].Add(new Suffer(0, 0));
+                minussufA[minusMaxsufAI + 1].Add(new Suffer(0, 0));
+
+
+                while ((nextSufArray = minussufA[sufAI++]) == null) ; //null以外のsufAを検出
+                nextSuf = nextSufArray[sufI++]; //
+
+                checkNum = (minusMaxPos - 1) / 32 + 1;
+
+                for (i = minusMinPos / 32; i < checkNum; i++)
+                {
+                    if (minuschecker[i] != 0) //必要のない箇所は飛ばす
+                    {
+                        for (int j = 0; j < 32; j++)
+                        {
+                            if ((minuschecker[i] & (1 << j)) != 0)
+                            {
+                                pos = i * 32 + j; //posの位置
+
+                                if (nextSuf.Position == pos) //被っている場合
+                                {
+                                    pos += intMin; //実際の値だが使いまわす
+                                    for (int k = 0; k < nextSuf.Suffers; k++) //被った回数だけboxに入れる
+                                    {
+                                        box[I++] = pos;
+                                    }
+
+                                    //次のかぶり要素の準備
+                                    nextSuf = nextSufArray[sufI++];
+                                    if (nextSufArray.Count == sufI)
+                                    {
+                                        while ((nextSufArray = minussufA[sufAI++]) == null) ;
+                                        sufI = 0;
+                                    }
+                                }
+                                else //被ってなければ
+                                {
+                                    box[I++] = pos + intMin;
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                sufI = 0;
+                sufAI = 0;
+
+                #region plusPutting
+
+                //OutOfIndexExceptionの対策
+                plussufA[plusMaxsufAI + 1] = new SortArray<Suffer>(3);
+                plussufA[plusMaxsufAI + 1].Add(new Suffer(0, 0));
+                plussufA[plusMaxsufAI + 1].Add(new Suffer(0, 0));
+
+                while ((nextSufArray = plussufA[sufAI++]) == null) ; //null以外のsufAを検出
+                nextSuf = nextSufArray[sufI++]; //
+
+
+
+                checkNum = (plusMaxPos - 1) / 32 + 1;
+                for (i = plusMinPos / 32; i < checkNum; i++)
+                {
+                    ;
+                    if (pluschecker[i] != 0) //必要のない箇所は飛ばす
+                    {
+                        for (int j = 0; j < 32; j++)
+                        {
+                            if ((pluschecker[i] & (1 << j)) != 0)
+                            {
+                                pos = i * 32 + j; //posの位置
+
+                                if (nextSuf.Position == pos) //被っている場合
+                                {
+                                    for (int k = 0; k < nextSuf.Suffers; k++) //被った回数だけboxに入れる
+                                    {
+                                        box[I++] = pos;
+                                    }
+
+                                    //次のかぶり要素の準備
+                                    nextSuf = nextSufArray[sufI++];
+                                    if (nextSufArray.Count == sufI)
+                                    {
+                                        while ((nextSufArray = plussufA[sufAI++]) == null) ;
+                                        sufI = 0;
+                                    }
+                                }
+                                else //被ってなければ
+                                {
+                                    box[I++] = pos;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                #endregion
+                
+                //メモリ開放
+                Marshal.FreeHGlobal((IntPtr)pluschecker);
+                Marshal.FreeHGlobal((IntPtr)minuschecker);
+            }
+
+            return box;
+        }
+
+        //固定ソート（ソート中にboxのアドレスを固定する）
+        //比べてみると固定しないほうが速い為、保留
+        /*
+        public static int[] FixSort(int[] box)
+        {
+            //初期化
+
+            int boxNum = box.Length; //要素数の数
+            if (boxNum == 0)
+                return box;
+            unsafe
+            {
+                //メモリ確保
+                int* pluschecker = (int*)Marshal.AllocHGlobal(67108865 * 4); //正の数チェッカー
+                int* minuschecker = (int*)Marshal.AllocHGlobal(67108865 * 4); //負の数チェッカー
+                for (int i = 0; i < 67108865; i++)
+                {
+                    pluschecker[i] = 0;
+                    minuschecker[i] = 0;
+                }
+
+                fixed (int* boxP = box)
+                {
+
+                    int plusMaxPos = 0; //正の最大値のチェックポイント
+                    int plusMinPos = int.MaxValue; //正の最小値のチェックポイント
+                    int minusMaxPos = 0; //負の最大値のチェックポイント
+                    int minusMinPos = plusMinPos; //負の最小値のチェックポイント
+                    int intMin = int.MinValue; //int型最小値
+                    int sufAnum = 2147483647 / 65536 + 2; //被りの配列の数
+                    int sufU = 65536; //被りの配列の単位
+
+                    SortArray<Suffer>[] plussufA = new SortArray<Suffer>[sufAnum]; //被り情報
+                    SortArray<Suffer>[] minussufA = new SortArray<Suffer>[sufAnum]; //被り情報
+
+                    int plusMaxsufAI = 0; //plussufAの使用している最大インデックス
+                    int minusMaxsufAI = 0; //minussufAの使用している最大インデックス
+
+                    int pos; //チェックの位置
+                    int a; //チェッカーのインデックス
+                    int b; //チェッカーの場所
+
+
+                    //int num = boxP[0]; //値を格納する場所 //格納しないほうが速い
+
+
+                    int i;
+                    // checker[pos / 32] += 1 << (pos % 32);//値格納
+
+                    //チェックする
+                    for (i = 0; i < boxNum; i++)
+                    {
+                        //num = boxP[i];
+                        if (boxP[i] < 0) //値が負の数なら
+                        {
+                            #region minusCheck
+
+                            pos = boxP[i] - intMin; //チェックの位置
+                            a = pos / 32; //チェッカーのインデックス
+                            b = 1 << (pos % 32); //チェッカーの場所
+                            if ((minuschecker[a] & b) == 0) //まだチェックをつけていなければ
+                            {
+                                if (pos < minusMinPos)
+                                    minusMinPos = pos;
+                                if (pos > minusMaxPos)
+                                    minusMaxPos = pos;
+
+                                minuschecker[a] += b; //チェックをつける
+                            }
+                            else //すでにチェックがついていたら（被ったら）
+                            {
+                                //int sg = pos / sufU; //被り配列のグループ番号
+                                SortArray<Suffer> sas = minussufA[pos / sufU];
+                                if (sas != null) //すでに被り配列が作られていたら
+                                {
+                                    int sufIn = sas.Find(pos); //すでに被っているか検索
+                                    if (sufIn == -1) //初めて被ったら
+                                    {
+                                        //新しいかぶりを作成
+                                        sas.Add(new Suffer(pos, 2));
+                                    }
+                                    else //すでに被っていたら
+                                    {
+                                        //かぶりを追加
+                                        Suffer suf = new Suffer(pos, sas[sufIn].Suffers + 1);
+                                        sas[sufIn] = suf;
+                                    }
+                                }
+                                else //まだ作られていなければ
+                                {
+                                    if (minusMaxsufAI < pos / sufU)
+                                        minusMaxsufAI = pos / sufU;
+                                    //新しい被り配列を作成
+                                    sas = minussufA[pos / sufU] = new SortArray<Suffer>(400);
+                                    sas.Add(new Suffer(pos, 2));
+                                }
+                            }
+
+                            #endregion
+                        }
+                        else //値が正の数なら
+                        {
+                            #region plusCheck
+
+                            //pos = boxP[i]; //チェックの位置
+                            a = boxP[i] / 32; //チェッカーのインデックス
+                            b = 1 << (boxP[i] % 32); //チェッカーの場所
+                            if ((pluschecker[a] & b) == 0) //まだチェックをつけていなければ
+                            {
+                                if (boxP[i] < plusMinPos)
+                                    plusMinPos = boxP[i];
+                                if (boxP[i] > plusMaxPos)
+                                    plusMaxPos = boxP[i];
+
+                                pluschecker[a] += b; //チェックをつける
+                            }
+                            else //すでにチェックがついていたら（被ったら）
+                            {
+                                //int sg = boxP[i] / sufU; //被り配列のグループ番号
+                                SortArray<Suffer> sas = plussufA[boxP[i] / sufU];
+                                if (sas != null) //すでに被り配列が作られていたら
+                                {
+                                    int sufIn = sas.Find(boxP[i]); //すでに被っているか検索
+                                    if (sufIn == -1) //初めて被ったら
+                                    {
+                                        //新しいかぶりを作成
+                                        sas.Add(new Suffer(boxP[i], 2));
+                                    }
+                                    else //すでに被っていたら
+                                    {
+                                        //かぶりを追加
+                                        Suffer suf = new Suffer(boxP[i], sas[sufIn].Suffers + 1);
+                                        sas[sufIn] = suf;
+                                    }
+                                }
+                                else //まだ作られていなければ
+                                {
+                                    if (plusMaxsufAI < boxP[i] / sufU)
+                                        plusMaxsufAI = boxP[i] / sufU;
+                                    //新しい被り配列を作成
+                                    sas = plussufA[boxP[i] / sufU] = new SortArray<Suffer>(400);
+                                    sas.Add(new Suffer(boxP[i], 2));
+                                }
+
+
+
+                            }
+
+                            #endregion
+                        }
+                    }
+
+                    //被り配列の並び替え
+                    for (i = 0; i < sufAnum; i++)
+                    {
+                        if (plussufA[i] != null)
+                            plussufA[i].Sort();
+                        if (minussufA[i] != null)
+                            minussufA[i].Sort();
+                    }
+
+                    //仕上げ
+                    int I = 0;//boxのインデックス
+                    int sufI = 0;//nextsufArrayのインデックス
+                    int sufAI = 0;//sufArrayのインデックス
+                    SortArray<Suffer> nextSufArray; //nextSufの配列
+                    Suffer nextSuf;//次の被り情報
+                    int checkNum;//チェックを確認するべき場所
+
+                    #region minusPutting
+
+                    //OutOfIndexExceptionの対策
+                    minussufA[minusMaxsufAI + 1] = new SortArray<Suffer>(3);
+                    minussufA[minusMaxsufAI + 1].Add(new Suffer(0, 0));
+                    minussufA[minusMaxsufAI + 1].Add(new Suffer(0, 0));
+
+
+                    while ((nextSufArray = minussufA[sufAI++]) == null) ; //null以外のsufAを検出
+                    nextSuf = nextSufArray[sufI++]; //
+
+                    checkNum = (minusMaxPos - 1) / 32 + 1;
+
+                    for (i = minusMinPos / 32; i < checkNum; i++)
+                    {
+                        if (minuschecker[i] != 0) //必要のない箇所は飛ばす
+                        {
+                            for (int j = 0; j < 32; j++)
+                            {
+                                if ((minuschecker[i] & (1 << j)) != 0)
+                                {
+                                    pos = i * 32 + j; //posの位置
+
+                                    if (nextSuf.Position == pos) //被っている場合
+                                    {
+                                        pos += intMin; //実際の値だが使いまわす
+                                        for (int k = 0; k < nextSuf.Suffers; k++) //被った回数だけboxに入れる
+                                        {
+                                            boxP[I++] = pos;
+                                        }
+
+                                        //次のかぶり要素の準備
+                                        nextSuf = nextSufArray[sufI++];
+                                        if (nextSufArray.Count == sufI)
+                                        {
+                                            while ((nextSufArray = minussufA[sufAI++]) == null) ;
+                                            sufI = 0;
+                                        }
+                                    }
+                                    else //被ってなければ
+                                    {
+                                        boxP[I++] = pos + intMin;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    #endregion
+
+                    sufI = 0;
+                    sufAI = 0;
+
+                    #region plusPutting
+
+                    //OutOfIndexExceptionの対策
+                    plussufA[plusMaxsufAI + 1] = new SortArray<Suffer>(3);
+                    plussufA[plusMaxsufAI + 1].Add(new Suffer(0, 0));
+                    plussufA[plusMaxsufAI + 1].Add(new Suffer(0, 0));
+
+                    while ((nextSufArray = plussufA[sufAI++]) == null) ; //null以外のsufAを検出
+                    nextSuf = nextSufArray[sufI++]; //
+
+
+
+                    checkNum = (plusMaxPos - 1) / 32 + 1;
+                    for (i = plusMinPos / 32; i < checkNum; i++)
+                    {
+                        ;
+                        if (pluschecker[i] != 0) //必要のない箇所は飛ばす
+                        {
+                            for (int j = 0; j < 32; j++)
+                            {
+                                if ((pluschecker[i] & (1 << j)) != 0)
+                                {
+                                    pos = i * 32 + j; //posの位置
+
+                                    if (nextSuf.Position == pos) //被っている場合
+                                    {
+                                        for (int k = 0; k < nextSuf.Suffers; k++) //被った回数だけboxに入れる
+                                        {
+                                            boxP[I++] = pos;
+                                        }
+
+                                        //次のかぶり要素の準備
+                                        nextSuf = nextSufArray[sufI++];
+                                        if (nextSufArray.Count == sufI)
+                                        {
+                                            while ((nextSufArray = plussufA[sufAI++]) == null) ;
+                                            sufI = 0;
+                                        }
+                                    }
+                                    else //被ってなければ
+                                    {
+                                        boxP[I++] = pos;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    #endregion
+
+                }
+                //メモリ開放
+                Marshal.FreeHGlobal((IntPtr)pluschecker);
+                Marshal.FreeHGlobal((IntPtr)minuschecker);
+            }
+
+            return box;
+        }
+        */
     }
 }
